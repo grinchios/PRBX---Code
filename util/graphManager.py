@@ -97,7 +97,13 @@ class TSPGraph():
         self.myMethodState = not self.myMethodState
         
         if self.myMethodState and self.myMethodPath == []:
-            self.myMethodPath = convexHull.monotoneChain(self.vertices)
+            # self.myMethodPath = convexHull.monotoneChain(self.vertices)
+            self.myMethodPath = gravityFunctions.fullMethod(self.vertices)
+
+            # Update unvisited
+            self.unvisited = [v for v in self.vertices if v not in self.myMethodPath]
+
+            self.highlightVertices(self.myMethodPath)
             self.myMethodLines = self.drawEdges(self.myMethodPath)
         
         elif self.myMethodState and self.myMethodPath != []:
@@ -106,6 +112,10 @@ class TSPGraph():
         else:
             for asset in self.myMethodLines:
                 self.window.delete(asset)
+
+    def highlightVertices(self, vertices):
+        for vertex in vertices:
+            self.createCircle(vertex, colour='orange')
 
     def drawEdges(self, circuit, colour='black', dash=None):
         edges = []
@@ -142,9 +152,6 @@ class TSPGraph():
         if self.CHState and self.CHLines == []:
             CH = convexHull.monotoneChain(self.vertices)
             self.CHLines = self.drawEdges(CH, colour='orange', dash=(5,1))
-
-            # Update unvisited
-            self.unvisited = [v for v in self.vertices if v not in CH]
 
         else:
             for asset in self.CHLines:

@@ -10,8 +10,9 @@ graphData = fileManager.loadFile('testFile.json')
 graph = graphManager.TSPGraph(CANVAS_WIDTH, CANVAS_HEIGHT, graphData['vertices'])
 
 # Calculate and draw bounding box
-graph.bbToggle()
-graph.chToggle()
+# graph.bbToggle()
+# graph.chToggle()
+graph.myMethodToggle()
 graph.drawCOG()
 graph.drawFurthestVertexFromCOG()
 
