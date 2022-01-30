@@ -44,6 +44,9 @@ class TSPGraph():
         self.vertices = vertices
         self.unvisited = vertices
 
+        # Method
+        self.myMethod = gravityFunctions.MyMethod(vertices)
+
     # Create whole GUI and attach inputs to relevant functions
     def create(self, width, height):
         master = Tk()
@@ -79,6 +82,9 @@ class TSPGraph():
         self.frames['newGraph'] = Button(master, text = 'New Graph', width=12, command=self.newGraph)
         self.frames['newGraph'].grid(row=3, column=1, padx=(0, 10))
 
+        self.frames['nextStep'] = Button(master, text = 'Next Step', width=12, command=self.myMethodIterate)
+        self.frames['nextStep'].grid(row=4, column=1, padx=(0, 10))
+
         self.n = StringVar(value=10)
         self.frames['newGraphVertices'] = Spinbox(master, from_=3, to=20, textvariable=self.n, wrap=False)
         self.frames['newGraphVertices'].grid(row=3, column=2, padx=(0, 10))
@@ -93,15 +99,36 @@ class TSPGraph():
 
         self.drawVertices()
 
+    def myMethodIterate(self):
+        # Update unvisited
+        self.unvisited = self.myMethod.unvisited
+
+        for asset in self.myMethodLines:
+            self.window.delete(asset)
+
+        if len(self.myMethodPath) > 0:
+            self.highlightVertices(self.myMethodPath)
+            self.myMethodLines = self.drawEdges(self.myMethodPath)
+
+        if len(self.unvisited) == 0:
+            print('Finished Graphing')
+            return
+
+        self.myMethodPath = self.myMethod.step()
+
+        if len(self.unvisited) != 0: 
+            self.drawCOG()
+            self.drawFurthestVertexFromCOG()
+
     def myMethodToggle(self):
         self.myMethodState = not self.myMethodState
         
         if self.myMethodState and self.myMethodPath == []:
             # self.myMethodPath = convexHull.monotoneChain(self.vertices)
-            self.myMethodPath = gravityFunctions.fullMethod(self.vertices)
+            self.myMethodPath = self.myMethod.fullMethod()
 
             # Update unvisited
-            self.unvisited = [v for v in self.vertices if v not in self.myMethodPath]
+            self.unvisited = self.myMethod.unvisited
 
             self.highlightVertices(self.myMethodPath)
             self.myMethodLines = self.drawEdges(self.myMethodPath)
@@ -192,10 +219,11 @@ class TSPGraph():
 
     # Draw vertices given as input
     def drawVertices(self):
-        for vertex in self.vertices:
-            self.createCircle(vertex)
+        print(self.vertices)
+        for i, vertex in enumerate(self.vertices):
+            self.createCircle(vertex, label=i)
 
-    def createCircle(self, vertex, r = 5, colour=None): #center coordinates, radius
+    def createCircle(self, vertex, r = 5, colour=None, label=None): #center coordinates, radius
         x = vertex[0]
         y = vertex[1]
 
@@ -203,6 +231,11 @@ class TSPGraph():
         y0 = y - r
         x1 = x + r
         y1 = y + r
+
+        # Draw text slightly above circle
+        if label != None:
+            self.window.create_text(x, y+r*2, text=label)
+
         return self.window.create_oval(x0, y0, x1, y1, fill=colour)
     
     # Draw COG and remove old one if present
@@ -210,14 +243,13 @@ class TSPGraph():
         if self.COGID != 0:
             self.window.delete(self.COGID)
         
-        self.COG = gravityFunctions.getCOG(self.unvisited)
-        self.COGID = self.createCircle(self.COG, colour='red')
+        self.COGID = self.createCircle(self.myMethod.COG, colour='red')
 
     # Draw furthest vertex from COG
     def drawFurthestVertexFromCOG(self):
         if self.furthestVertexID != 0:
             self.window.delete(self.furthestVertexID)
         
-        self.furthestVertex = gravityFunctions.furthestVertexFromCOG(self.unvisited, self.COG)
+        self.furthestVertex = self.myMethod.furthestVertexFromCOG()
         self.furthestVertexID = self.createCircle(self.furthestVertex, colour='blue')
         
