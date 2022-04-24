@@ -22,4 +22,5 @@ class Bruteforce():
                 self.current_best_path = path
                 self.current_best_distance = distance
 
+        print("Bruteforce Distance: ", self.current_best_distance)
         return self.current_best_path[:-1]

@@ -6,7 +6,7 @@ from turtle import color
 
 from matplotlib.pyplot import text
 from util import gravityFunctions, convexHull, createGraph
-from methods import bruteforce
+from methods import bruteforce, christofides, heldkarp
 
 class TSPGraph():
     def __init__(self, width, height, vertices):
@@ -24,13 +24,21 @@ class TSPGraph():
     def initVariables(self, vertices):
         # Variables
         self.frames = {}
-        self.BBState = False
-        self.BBLines = []
         self.CHState = False
         self.CHLines = []
         self.BFState = False
         self.BFLines = []
         self.BFPath = []
+
+        self.ChristofidesState = False
+        self.ChristofidesLines = []
+        self.ChristofidesPath = []
+
+        self.KarpState = False
+        self.KarpLines = []
+        self.KarpPath = []
+
+
         self.COG = []
         self.COGID = 0
         self.furthestVertex = []
@@ -67,8 +75,8 @@ class TSPGraph():
         self.frames['edgeCOG'] = Button(master, text="Draw COG", width=12, command=self.drawCOG)
         self.frames['edgeCOG'].grid(row=0, column=2, padx=(0, 50))
 
-        self.frames['boundingBox'] = Button(master, text = 'Toggle BB', width=12, command=self.bbToggle)
-        self.frames['boundingBox'].grid(row=1, column=1, padx=(0, 10))
+        self.frames['christofides'] = Button(master, text = 'Christofides', width=12, command=self.christofidesToggle)
+        self.frames['christofides'].grid(row=1, column=1, padx=(0, 10))
 
         self.frames['convexHull'] = Button(master, text="Toggle CH", width=12, command=self.chToggle)
         self.frames['convexHull'].grid(row=1, column=2, padx=(0, 50))
@@ -79,15 +87,18 @@ class TSPGraph():
         self.frames['mymethod'] = Button(master, text = 'My Method', width=12, command=self.myMethodToggle)
         self.frames['mymethod'].grid(row=2, column=2, padx=(0, 50))
 
-        self.frames['newGraph'] = Button(master, text = 'New Graph', width=12, command=self.newGraph)
-        self.frames['newGraph'].grid(row=3, column=1, padx=(0, 10))
+        self.frames['heldkarp'] = Button(master, text = 'Held-Karp', width=12, command=self.heldKarpToggle)
+        self.frames['heldkarp'].grid(row=3, column=1, padx=(0, 10))
 
-        self.frames['nextStep'] = Button(master, text = 'Next Step', width=12, command=self.myMethodIterate)
-        self.frames['nextStep'].grid(row=4, column=1, padx=(0, 10))
+        self.frames['newGraph'] = Button(master, text = 'New Graph', width=12, command=self.newGraph)
+        self.frames['newGraph'].grid(row=4, column=1, padx=(0, 10))
 
         self.n = StringVar(value=10)
         self.frames['newGraphVertices'] = Spinbox(master, from_=3, to=20, textvariable=self.n, wrap=False)
-        self.frames['newGraphVertices'].grid(row=3, column=2, padx=(0, 10))
+        self.frames['newGraphVertices'].grid(row=4, column=2, padx=(0, 10))
+
+        self.frames['nextStep'] = Button(master, text = 'Next Step', width=12, command=self.myMethodIterate)
+        self.frames['nextStep'].grid(row=5, column=1, padx=(0, 10))
 
         return w
 
@@ -111,7 +122,7 @@ class TSPGraph():
             self.myMethodLines = self.drawEdges(self.myMethodPath)
 
         if len(self.unvisited) == 0:
-            print('Finished Graphing')
+            print('Finished Graphing: ', self.myMethod.cycleLength(self.myMethod.edges))
             return
 
         self.myMethodPath = self.myMethod.step()
@@ -120,18 +131,41 @@ class TSPGraph():
             self.drawCOG()
             self.drawFurthestVertexFromCOG()
 
+    def heldKarpToggle(self):
+        self.KarpState = not self.KarpState
+        
+        if self.KarpState and self.KarpPath == []:
+            hk = heldkarp.HeldKarp(self.vertices)
+            _, self.KarpPath = hk.go()
+            self.KarpLines = self.drawEdges(self.KarpPath, colour='blue')
+
+        elif self.KarpState and self.KarpPath != []:
+            self.KarpLines = self.drawEdges(self.KarpPath, colour='blue')
+        
+        else:
+            for asset in self.KarpLines:
+                self.window.delete(asset)
+
+            self.KarpLines = []
+
     def myMethodToggle(self):
         self.myMethodState = not self.myMethodState
         
         if self.myMethodState and self.myMethodPath == []:
             # self.myMethodPath = convexHull.monotoneChain(self.vertices)
-            self.myMethodPath = self.myMethod.fullMethod()
+            # self.myMethodPath = self.myMethod.go()
+            # self.myMethodPath = self.myMethod.convertEdgesToVertices(self.myMethodPath)
 
             # Update unvisited
             self.unvisited = self.myMethod.unvisited
 
+            while self.unvisited:
+                self.myMethodPath = self.myMethod.step()
+                self.unvisited = self.myMethod.unvisited
+
             self.highlightVertices(self.myMethodPath)
             self.myMethodLines = self.drawEdges(self.myMethodPath)
+            print('Finished Graphing: ', self.myMethod.cycleLength(self.myMethod.edges))
         
         elif self.myMethodState and self.myMethodPath != []:
             self.myMethodLines = self.drawEdges(self.myMethodPath)
@@ -153,6 +187,24 @@ class TSPGraph():
         edges.append(self.window.create_line(circuit[0][0], circuit[0][1], circuit[len(circuit)-1][0], circuit[len(circuit)-1][1], fill=colour, dash=dash))
 
         return edges
+
+    # Show Christofides Path
+    def christofidesToggle(self):
+        self.ChristofidesState = not self.ChristofidesState
+        
+        if self.ChristofidesState and self.ChristofidesPath == []:
+            ch = christofides.Christofides(self.vertices)
+            _, self.ChristofidesPath = ch.go()
+            self.ChristofidesLines = self.drawEdges(self.ChristofidesPath, colour='blue')
+
+        elif self.ChristofidesState and self.ChristofidesPath != []:
+            self.ChristofidesLines = self.drawEdges(self.ChristofidesPath, colour='blue')
+        
+        else:
+            for asset in self.ChristofidesLines:
+                self.window.delete(asset)
+
+            self.ChristofidesLines = []
 
     # Show Bruteforce Path
     def bruteforceToggle(self):
@@ -185,37 +237,6 @@ class TSPGraph():
                 self.window.delete(asset)
 
             self.CHLines = []
-
-    # Get smallest / largest x and y values
-    def bbToggle(self):
-        self.BBState = not self.BBState
-
-        if self.BBState:
-            xMin, xMax, yMin, yMax = math.inf, 0, math.inf, 0
-        
-            for vertex in self.vertices:
-                if vertex[0] < xMin:
-                    xMin = vertex[0]
-                
-                elif vertex[0] > xMax:
-                    xMax = vertex[0]
-
-                if vertex[1] < yMin:
-                    yMin = vertex[1]
-                
-                elif vertex[1] > yMax:
-                    yMax = vertex[1]
-            
-            self.BBLines.append(self.window.create_line(xMin, 0, xMin, self.windowHeight, dash=(4,2)))
-            self.BBLines.append(self.window.create_line(xMax, 0, xMax, self.windowHeight, dash=(4,2)))
-            self.BBLines.append(self.window.create_line(0, yMin, self.windowWidth, yMin, dash=(4,2)))
-            self.BBLines.append(self.window.create_line(0, yMax, self.windowWidth, yMax, dash=(4,2)))
-        
-        else:
-            for asset in self.BBLines:
-                self.window.delete(asset)
-
-            self.BBLines = []
 
     # Draw vertices given as input
     def drawVertices(self):
@@ -251,5 +272,7 @@ class TSPGraph():
             self.window.delete(self.furthestVertexID)
         
         self.furthestVertex = self.myMethod.furthestVertexFromCOG()
-        self.furthestVertexID = self.createCircle(self.furthestVertex, colour='blue')
+
+        for vertex in self.furthestVertex:
+            self.furthestVertexID = self.createCircle(vertex, colour='blue')
         

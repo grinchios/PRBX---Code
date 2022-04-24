@@ -2,13 +2,13 @@ import json
 import random
 from pprint import pprint
 
-def create(n):
+def create(n, HEIGHT=500, WIDTH=500):
     data = {}
 
     data['points'] = n
 
-    height = 500
-    width = 500
+    height = HEIGHT
+    width = WIDTH
     data['canvas'] = {
         'height' : height,
         'width' : width

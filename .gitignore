@@ -1,0 +1,5 @@
+statistics/*
+graphs/*
+dataset/*
+.vscode/
+__pycache__/
