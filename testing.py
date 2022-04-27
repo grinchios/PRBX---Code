@@ -11,10 +11,12 @@ from methods import christofides, prims
 from util import gravityFunctions, createGraph
 
 # Variables
-ITERATIONS = 8
-CITYCOUNT = 100
-CORECOUNT = mp.cpu_count()
-# CORECOUNT = 4
+ITERATIONS = 8                  # How many loops you wish to perform when random testing
+CITYCOUNTSTART = 3              # The start number of cities when random testing
+CITYCOUNTEND = 100              # The upper bound of cities when random testing
+CORECOUNT = mp.cpu_count()      # The number of cores to use, default: all cores
+VERSION = 'random'              # versions include random or tsplib
+# VERSION = 'tsplib'
 
 def getFiles():
     directory = 'dataset'
@@ -125,45 +127,47 @@ def runTSPLIB(graphData):
     return csvLine
 
 if __name__ == '__main__':
-    # print("Starting with {} cores".format(CORECOUNT))
+    if VERSION == 'random':
+        print("Starting with {} cores".format(CORECOUNT))
 
-    # # Creating CSV file helper
-    # HEADER = ['city count', 'christofides', 'christofides time', 'prims', 'prims time', 'my method', 'my method time']
-    # f = open('./statistics/testing-{}-{}.csv'.format(CITYCOUNT, os.getpid()), 'w+', encoding='UTF8', newline='')
-    # writer = csv.writer(f)
-    # writer.writerow(HEADER)
+        # Creating CSV file helper
+        HEADER = ['city count', 'christofides', 'christofides time', 'prims', 'prims time', 'my method', 'my method time']
+        f = open('./statistics/testing-{}-{}.csv'.format(CITYCOUNTEND, os.getpid()), 'w+', encoding='UTF8', newline='')
+        writer = csv.writer(f)
+        writer.writerow(HEADER)
 
-    # # Multiprocessing
-    # pool = mp.Pool(CORECOUNT)
+        # Multiprocessing
+        pool = mp.Pool(CORECOUNT)
 
-    # for cityCount in range(807, CITYCOUNT+1):
-    #     print("Processing city count {}".format(cityCount))
-    #     n = [cityCount for i in range(ITERATIONS)]
-    #     results = pool.map(main, n)
+        for cityCount in range(CITYCOUNTSTART, CITYCOUNTEND):
+            print("Processing city count {}".format(cityCount))
+            n = [cityCount for i in range(ITERATIONS)]
+            results = pool.map(main, n)
 
-    #     for threadResults in results:
-    #         writer.writerow(threadResults)
-    
-    # print("Finished")
+            for threadResults in results:
+                writer.writerow(threadResults)
+        
+        print("Finished")
 
-    fileList = getFiles()
-    
-    # TSPLIB95
-    HEADER = ['filename','city count', 'christofides', 'christofides time', 'prims', 'prims time', 'my method', 'my method time']
-    f = open('./statistics/TSPLIB95.csv', 'w+', encoding='UTF8', newline='')
-    writer = csv.writer(f)
-    writer.writerow(HEADER)
+    elif VERSION == 'tsplib':
+        fileList = getFiles()
+        
+        # TSPLIB95
+        HEADER = ['filename','city count', 'christofides', 'christofides time', 'prims', 'prims time', 'my method', 'my method time']
+        f = open('./statistics/TSPLIB95.csv', 'w+', encoding='UTF8', newline='')
+        writer = csv.writer(f)
+        writer.writerow(HEADER)
 
-    for file in fileList:
-        currentGraph = openFile(file)
+        for file in fileList:
+            currentGraph = openFile(file)
 
-        nodes = len(currentGraph)
-        print("Checking file", file, nodes)
+            nodes = len(currentGraph)
+            print("Checking file", file, nodes)
 
-        if nodes>0 and nodes<2000:
-            print("Running...")
+            if nodes>0 and nodes<2000:
+                print("Running...")
 
-            line = runTSPLIB(currentGraph)
-            line = [file] + line
-            writer.writerow(line)
-    
+                line = runTSPLIB(currentGraph)
+                line = [file] + line
+                writer.writerow(line)
+        
