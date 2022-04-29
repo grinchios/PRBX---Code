@@ -18,6 +18,8 @@ CORECOUNT = mp.cpu_count()      # The number of cores to use, default: all cores
 VERSION = 'random'              # versions include random or tsplib
 # VERSION = 'tsplib'
 
+BIGREDBUTTON = False
+
 def getFiles():
     directory = 'dataset'
     
@@ -75,8 +77,6 @@ def main(n):
     PRLength, _ = PR.go()
     PRTime = time.time() - PRStartTime
     # print('Prims finished')
-    # PRLength    = 0
-    # PRTime      = 0
 
     # My Method
     MMStartTime = time.time()
@@ -102,13 +102,7 @@ def runTSPLIB(graphData):
     CHTime = time.time() - CHStartTime
     print("\tFinished Christofides", str(CHTime)+"s")
 
-    # Prims algorithm
     PRStartTime = time.time()
-    # print("\tInitialising Prims")
-    # PR = prims.Prims(graphData)
-    # print("\tStarting Prims")
-    # PRLength, _ = PR.go()
-    # PRTime = time.time() - PRStartTime
     PRLength, _ = 1000000000000000000000, 0
     PRTime      = 1000000000000000000000
     print("\tFinished Prims", str(PRTime)+"s")
@@ -164,7 +158,7 @@ if __name__ == '__main__':
             nodes = len(currentGraph)
             print("Checking file", file, nodes)
 
-            if nodes>0 and nodes<2000:
+            if (nodes>0 and nodes<2000) or (nodes>0 and BIGREDBUTTON):
                 print("Running...")
 
                 line = runTSPLIB(currentGraph)

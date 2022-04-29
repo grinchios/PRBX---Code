@@ -69,8 +69,8 @@ class TSPGraph():
         w.grid(row=0, column=0, sticky=W,  padx=(0, 50), rowspan=10)
 
         # Right side of window, options
-        self.frames['vertexCOG'] = Button(master, text = 'vertex -> COG', width=12, command=self.drawFurthestVertexFromCOG)
-        self.frames['vertexCOG'].grid(row=0, column=1, padx=(0, 10))
+        # self.frames['vertexCOG'] = Button(master, text = 'removed feature', width=12, command=self.drawFurthestVertexFromCOG)
+        # self.frames['vertexCOG'].grid(row=0, column=1, padx=(0, 10))
 
         self.frames['edgeCOG'] = Button(master, text="Draw COG", width=12, command=self.drawCOG)
         self.frames['edgeCOG'].grid(row=0, column=2, padx=(0, 50))
