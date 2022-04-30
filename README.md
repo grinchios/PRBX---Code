@@ -1,5 +1,7 @@
 # Travelling Salesman Problem Approximation Algorithm
 ## Made by Callum Pritchard
+## Part of University of York - Computer Science
+---
 Enjoy, don't break anything!
 
 ## Overview
