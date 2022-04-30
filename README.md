@@ -18,7 +18,8 @@ Random graphs and notable graphs are saved within `graphs/`.
 These are not easily loaded so not expected for marking, just a note that they exist.
 
 ## Results
-Results can be found within `statistics/`
+Results can be found within `statistics/` 
+File used for graphs within submission can be found within `overall.csv` and `TSPLIB95.csv`
 
 ## Running GUI
 `pip -r requirements.txt`  
