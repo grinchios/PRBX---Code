@@ -22,7 +22,7 @@ Results can be found within `statistics/`
 File used for graphs within submission can be found within `overall.csv` and `TSPLIB95.csv`
 
 ## Running GUI
-`pip -r requirements.txt`  
+`pip3 install -r requirements.txt`  
 `python main.py`
 
 ## Running Headless (bulk testing)
