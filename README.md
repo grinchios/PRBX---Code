@@ -8,6 +8,7 @@ Enjoy, don't break anything!
 - Requirements can be found within requirements.txt
 - Python 3.8 required 
 - Run `main.py` for a GUI version and `testing.py` for a bulk run headless version.
+- Only tested with Python on Windows with Tkinter installed
 
 ## Datasets
 TSPLIB datasets are found within `dataset/`.
@@ -22,7 +23,6 @@ Results can be found within `statistics/`
 File used for graphs within submission can be found within `overall.csv` and `TSPLIB95.csv`
 
 ## Running GUI
-`apt install python-tk`
 `pip3 install -r requirements.txt`  
 `python main.py`
 
