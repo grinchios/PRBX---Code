@@ -148,7 +148,7 @@ if __name__ == '__main__':
         
         # TSPLIB95
         HEADER = ['filename','city count', 'christofides', 'christofides time', 'prims', 'prims time', 'my method', 'my method time']
-        f = open('./statistics/TSPLIB95.csv', 'w+', encoding='UTF8', newline='')
+        f = open('./statistics/TSPLIB.csv', 'w+', encoding='UTF8', newline='')
         writer = csv.writer(f)
         writer.writerow(HEADER)
 
